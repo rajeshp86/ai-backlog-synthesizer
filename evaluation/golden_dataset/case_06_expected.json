@@ -1,0 +1,53 @@
+{
+  "case_id": "case_06",
+  "description": "All three escalations correspond to existing JIRA tickets. Each must be flagged as a duplicate with at least medium confidence.",
+
+  "required_topics": [
+    {
+      "theme_keywords": ["production", "order", "status", "badge"],
+      "must_appear": true,
+      "rationale": "Production order status accuracy in PartnerPortal is the first escalation."
+    },
+    {
+      "theme_keywords": ["supplier", "delivery", "confirmation"],
+      "must_appear": true,
+      "rationale": "Supplier delivery confirmation confusion — second escalation."
+    },
+    {
+      "theme_keywords": ["partner portal", "sso"],
+      "must_appear": true,
+      "rationale": "Client portal SAML SSO — third escalation."
+    }
+  ],
+
+  "forbidden_topics": [],
+
+  "expected_duplicates": [
+    {
+      "story_theme": ["production", "order", "badge"],
+      "existing_id": "QT-412",
+      "min_confidence": "medium",
+      "rationale": "QT-412 is the production order status badge ticket."
+    },
+    {
+      "story_theme": ["supplier", "delivery", "confirmation"],
+      "existing_id": "QT-389",
+      "min_confidence": "medium",
+      "rationale": "QT-389 is the supplier delivery confirmation confusion ticket."
+    },
+    {
+      "story_theme": ["partner portal", "sso"],
+      "existing_id": "QT-301",
+      "min_confidence": "medium",
+      "rationale": "QT-301 is the client portal SAML SSO ticket."
+    }
+  ],
+
+  "expected_constraint_conflicts": [],
+
+  "expected_story_acceptance_criteria_min": 2,
+  "expected_story_acceptance_criteria_max": 7,
+  "expected_epic_count_range": [1, 4],
+  "expected_minimum_story_count": 2,
+  "expected_maximum_story_count": 6
+}

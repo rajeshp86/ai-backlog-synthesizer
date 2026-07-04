@@ -1,0 +1,190 @@
+# Backlog Synthesizer — Prometheus alerting rules
+#
+# Load this file into your Prometheus server:
+#   prometheus.yml:
+#     rule_files:
+#       - /etc/prometheus/rules/backlog_synthesizer.yml
+#
+# All alerts route through Alertmanager.  Configure receivers
+# (PagerDuty, Slack, email) in alertmanager.yml separately.
+#
+# Severity labels:
+#   critical  — page on-call immediately
+#   warning   — create a ticket, review next business day
+#   info      — dashboard annotation only
+
+groups:
+  - name: backlog_synthesizer.quality
+    interval: 60s
+    rules:
+
+      # ── Synthesis failure rate ──────────────────────────────────────────
+      - alert: SynthesisFailureRateHigh
+        expr: |
+          (
+            sum(rate(backlog_syntheses_total{status="failure"}[10m]))
+            /
+            sum(rate(backlog_syntheses_total[10m]))
+          ) > 0.10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Synthesis failure rate > 10 %"
+          description: >
+            {{ $value | humanizePercentage }} of synthesis runs are failing
+            over the last 10 minutes.
+            Check application logs: kubectl logs -l app=backlog-synthesizer
+
+      - alert: SynthesisFailureRateCritical
+        expr: |
+          (
+            sum(rate(backlog_syntheses_total{status="failure"}[10m]))
+            /
+            sum(rate(backlog_syntheses_total[10m]))
+          ) > 0.30
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Synthesis failure rate > 30 % — possible outage"
+          description: >
+            {{ $value | humanizePercentage }} of synthesis runs are failing.
+            Likely cause: Anthropic API outage or misconfiguration.
+
+      # ── LLM API error rate ──────────────────────────────────────────────
+      - alert: LLMErrorRateHigh
+        expr: |
+          (
+            sum(rate(backlog_llm_errors_total[10m]))
+            /
+            clamp_min(sum(rate(backlog_syntheses_total[10m])), 1)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM API error rate > 5 %"
+          description: >
+            {{ $value | humanizePercentage }} of LLM calls are returning errors
+            (provider: {{ $labels.provider }}).
+            Check API key validity and provider status pages.
+
+      - alert: LLMErrorRateCritical
+        expr: |
+          (
+            sum(rate(backlog_llm_errors_total[5m]))
+            /
+            clamp_min(sum(rate(backlog_syntheses_total[5m])), 1)
+          ) > 0.25
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "LLM API error rate > 25 % — provider may be down"
+          description: "Provider {{ $labels.provider }} returning errors at {{ $value | humanizePercentage }}."
+
+  - name: backlog_synthesizer.cost
+    interval: 300s
+    rules:
+
+      # ── Per-run average cost ────────────────────────────────────────────
+      - alert: AverageRunCostHigh
+        expr: |
+          (
+            sum(rate(backlog_synthesis_cost_usd_sum[1h]))
+            /
+            clamp_min(sum(rate(backlog_synthesis_cost_usd_count[1h])), 1)
+          ) > 2.0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Average synthesis cost > $2 / run (1-hour rolling)"
+          description: >
+            Rolling 1-hour average cost per run is ${{ $value | printf "%.2f" }}.
+            Inspect token usage: check if a single model stage is consuming
+            excessive tokens (e.g. EpicDecomposer with large backlogs).
+
+      # ── Daily token burn rate ───────────────────────────────────────────
+      - alert: HighDailyTokenConsumption
+        expr: sum(increase(backlog_tokens_total[24h])) > 5000000
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: "Daily token consumption > 5 M tokens"
+          description: >
+            {{ $value | humanize }} tokens consumed in the last 24 hours.
+            Review active users and any runaway automation.
+
+  - name: backlog_synthesizer.latency
+    interval: 60s
+    rules:
+
+      # ── p95 synthesis latency ───────────────────────────────────────────
+      - alert: P95LatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(backlog_synthesis_duration_seconds_bucket[15m]))
+          ) > 300
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 synthesis latency > 5 minutes"
+          description: >
+            95th-percentile synthesis duration is
+            {{ $value | humanizeDuration }}.
+            Possible causes: Anthropic or Gemini API throttling,
+            or an unusually large input document.
+
+      - alert: P95LatencyCritical
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(backlog_synthesis_duration_seconds_bucket[15m]))
+          ) > 600
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "p95 synthesis latency > 10 minutes — likely stuck"
+          description: >
+            95th-percentile synthesis duration is
+            {{ $value | humanizeDuration }}.
+            Investigate for stuck threads or infinite LLM retries.
+
+  - name: backlog_synthesizer.availability
+    interval: 30s
+    rules:
+
+      # ── Service health (requires Blackbox Exporter) ─────────────────────
+      - alert: StreamlitHealthCheckFailing
+        expr: |
+          probe_success{
+            job="blackbox",
+            instance=~".*backlog-synthesizer.*/_stcore/health"
+          } == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Streamlit health check failing"
+          description: >
+            The /_stcore/health endpoint is not returning 200.
+            The app may be starting up, crashed, or OOMed.
+
+      # ── Active synthesis stuck ──────────────────────────────────────────
+      - alert: SynthesisApparentlyStuck
+        expr: backlog_active_synthesis == 1
+        for: 20m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Synthesis has been running for > 20 minutes"
+          description: >
+            backlog_active_synthesis has been 1 for 20+ minutes.
+            A run normally completes in 1–5 minutes; this may indicate
+            a hung LLM call or a thread that did not clean up after cancellation.

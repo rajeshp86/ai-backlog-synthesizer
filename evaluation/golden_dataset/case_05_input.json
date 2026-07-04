@@ -1,0 +1,7 @@
+{
+  "case_id": "case_05",
+  "description": "Empty / cancelled meeting transcript. The pipeline must complete cleanly with zero stories rather than hallucinating from the single line.",
+  "transcript_path": "evaluation/golden_dataset/transcripts/case_05_empty.txt",
+  "constraints_path": "samples/architecture_constraints.md",
+  "backlog_path": "samples/jira_backlog.json"
+}

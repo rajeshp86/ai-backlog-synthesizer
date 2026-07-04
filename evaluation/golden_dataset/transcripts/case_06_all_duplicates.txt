@@ -1,0 +1,14 @@
+Quantum Technologies — Client success debrief, 2026-04-15
+Attendees: Priya (VP Digital Ops), Kenji (Client Portal Lead)
+
+Priya: Three escalations this week, all repeats of stuff we already have in the backlog.
+
+1. The "On Track" order status badge in the PartnerPortal still shows for orders that are actually delayed in production. Clients click through and arrive to find the order is behind schedule. We already opened QT-412 on this back in March.
+
+2. Supplier delivery confirmation emails are still confusing clients — the initial "Materials Confirmed" message doesn't make clear that the delivery date is provisional. QT-389 in the backlog covers this exactly.
+
+3. The top-20 client groups keep asking to log into the PartnerPortal with their own identity provider instead of our local accounts. We have QT-301 already open for SAML SSO.
+
+Kenji: So nothing new this week, just repeated pain on existing tickets. Right?
+
+Priya: Right. The reason I called the meeting is to escalate priority on the existing tickets, not to file new ones.

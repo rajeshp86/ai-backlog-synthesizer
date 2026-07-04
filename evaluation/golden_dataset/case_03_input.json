@@ -1,0 +1,7 @@
+{
+  "case_id": "case_03",
+  "description": "Platform engineering Slack standup rollup. Tests robustness: the transcript mixes real product asks with off-topic chatter (coffee, TV, lunch, vacation). Should produce stories about reliable remote diagnostics via the diagnostic control plane + in-portal invoice payment, ignore the chatter. Expect a duplicate against QT-251 (production order ranking by client preferences) and QT-243 (in-portal invoice payment).",
+  "transcript_path": "evaluation/golden_dataset/transcripts/case_03_engineering_standup.txt",
+  "constraints_path": "samples/architecture_constraints.md",
+  "backlog_path": "samples/jira_backlog.json"
+}

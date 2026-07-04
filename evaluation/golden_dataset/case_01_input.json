@@ -1,0 +1,7 @@
+{
+  "case_id": "case_01",
+  "description": "The bundled Quantum Technologies Q3 planning meeting. Should produce high-priority topics (firmware deployment resilience, production order status accuracy, NCR/CAPA case unification, supplier delivery confirmation visibility), flag duplicates against QT-412 and QT-389, and conflict-flag any automatic security-critical firmware rollback story.",
+  "transcript_path": "samples/meeting_notes.txt",
+  "constraints_path": "samples/architecture_constraints.md",
+  "backlog_path": "samples/jira_backlog.json"
+}

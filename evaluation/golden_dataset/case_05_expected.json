@@ -1,0 +1,23 @@
+{
+  "case_id": "case_05",
+  "description": "Hallucination guardrail check on an essentially empty transcript. No stories should be produced, no conflicts, no duplicates.",
+
+  "required_topics": [],
+
+  "forbidden_topics": [
+    {
+      "theme_keywords": ["cancelled"],
+      "must_not_appear": true,
+      "rationale": "The single literal word 'cancelled' should not become a topic."
+    }
+  ],
+
+  "expected_duplicates": [],
+  "expected_constraint_conflicts": [],
+
+  "expected_story_acceptance_criteria_min": 2,
+  "expected_story_acceptance_criteria_max": 7,
+  "expected_epic_count_range": [0, 1],
+  "expected_minimum_story_count": 0,
+  "expected_maximum_story_count": 1
+}

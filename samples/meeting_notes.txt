@@ -1,0 +1,168 @@
+Digital Operations — Q3 Planning Meeting
+Attendees: Priya (VP Digital Operations), Ravi (Director Platform Engineering),
+           Kenji (Client Portal Lead), Petra (Supply Chain & Operations Tech),
+           Yusuf (Compliance & Quality Director), Nalini (Quality & NCR Program Manager)
+Date: April 11
+
+Priya kicked off — said the last 90 days of feedback from enterprise
+client admins, quality engineers, and the PartnerPortal survey are telling
+us pretty consistent things. She wants us to leave this meeting with a
+synthesized list of client-facing problems we should tackle in Q3.
+
+------
+
+Theme 1: Firmware deployment failures during maintenance windows
+
+Petra led on this. Last month was the worst — three regional batch firmware
+deployments to embedded control modules at client sites failed during the
+nightly maintenance window. Modules sat in "Update Pending" for over 45
+minutes, blocking the next scheduled deployment wave. Clients reported that
+embedded controllers were unresponsive during the stuck state. Petra's data:
+when the FirmwareVault CDN throughput cap is hit, the deployment orchestrator
+keeps retrying without backing off — it can't even fall back gracefully
+because it can't validate the partial download locally.
+
+She wants us to build a proper staged-rollout with offline resilience for
+the firmware deployment system. At minimum: modules should resume normal
+operation immediately if an update stalls, retries should use exponential
+back-off, and the rollout throttle should be configurable per deployment
+ring. She thinks auto-rollback would be ideal but compliance is going to
+push back. (Yusuf confirmed — IEC 62443 and our firmware signing policy
+require a validated rollback path, not an automatic one for security-critical
+firmware updates.)
+
+Ravi asked: "Can we checkpoint the download progress on the module so
+when connectivity resumes it picks up where it left off instead of
+restarting the full package?" Petra: "Yes, that's the design. Local
+staging partition on the controller, resume from byte offset when online."
+
+Priya: "This is high priority. We're seeing client satisfaction drop
+after failed deployment nights and account managers are escalating."
+
+------
+
+Theme 2: PartnerPortal order status showing stale data
+
+Kenji has been deep in the feedback. OEM clients search for their order
+status in the PartnerPortal and the top results show orders marked "On Track"
+that are actually behind in production. They click through and can't get
+real status. NPS for clients who hit this is -28. Clients who don't hit
+it are +18.
+
+Three things tangled here:
+- Order status data in the PartnerPortal is refreshed only every 4 hours
+- The "On Track" badge pulls from a third-party ERP feed that disagrees
+  with real-time MES data about 18% of the time
+- Alternative delivery window options don't appear until after the client
+  has already escalated to their account manager, way too late
+
+Kenji: "I think we want to push live production telemetry from the MES into
+the order status service as a signal. And surface alternative delivery
+windows inline when an order shows high latency risk."
+
+Yusuf raised: "We need to make sure we're not showing differential status
+to different users for ITAR-controlled article orders — we can't expose
+controlled production data without access control gating."
+
+Priya: "Note that for ITAR review. Don't let it block us — gate by
+article classification."
+
+------
+
+Theme 3: NCR / CAPA case intake channel split
+
+Nalini brought receipts. The single biggest complaint to the client support
+line is "I submitted an NCR via the PartnerPortal but the quality engineer
+says they have no record and nothing has been actioned." It's because we
+have TWO case intake channels: the PartnerPortal submission, and direct
+QualityHub entry by account managers. They write to different systems and
+the systems don't reconcile in real time.
+
+Nalini wants:
+- One unified case record per client-order/incident, regardless of intake channel
+- A clear status the client sees ("submitted / in review / resolved")
+- A push notification when the corrective action is actually confirmed
+
+Yusuf: "GDPR and ITAR. Any notification that references a specific NCR
+number and controlled article description has to be consent-based and we
+can only send to the client's verified technical contact — not a shared
+enterprise account."
+
+------
+
+Theme 4: Supplier delivery confirmation confusion
+
+Priya mentioned this almost as an aside but it kept coming up. Internal
+production planners and clients don't understand how Quantum Technologies
+handles supplier delivery confirmations against production schedules.
+They get a "Materials Confirmed" alert at PO placement and then days later
+"Material Delayed — production rescheduled" and they're upset because they
+didn't realise the initial confirmation was provisional. The confirmed
+delivery date isn't visible from any client-facing surface.
+
+Kenji thinks the fix is mostly informational — show a "material status"
+card in the PartnerPortal that makes the confirmed delivery date, outstanding
+PO status, and production impact visible. Ravi: "Should be a small addition.
+Not a platform rewrite. We can fit it in."
+
+------
+
+Theme 5: Legacy Gen1 embedded controller hardware in 2019–2021 vintage
+
+Petra: side-bar but worth flagging. Gen1 embedded controllers in the
+2019–2021 vintage are running with 256 MB flash. They can't receive
+differential firmware packages — only full firmware images — and they don't
+support TLS 1.3. Hardware refresh is approved for the next device campaign
+but won't reach full coverage until FY26 Q2.
+
+Ravi: "Good call-out. Flag this on every new firmware-dependent story —
+the Gen1 controller has a different capability floor than Gen2 devices."
+
+------
+
+Theme 6: Remote diagnostics unreliable on industrial plant Wi-Fi
+
+Kenji again. The PartnerPortal's remote diagnostic commands for field-deployed
+modules succeed only about 88% of the time on industrial plant Wi-Fi, and
+the worst offenders are congested plant networks and high-interference
+factory floors. The portal shows "Command Sent" the moment it queues, so
+clients think it worked and come back to a module that never received the
+command. Two things: (1) the portal must reflect the *actual* acknowledgement
+from the diagnostic control plane, not just that the command was queued;
+(2) the actuation path should go through the diagnostic control plane with a
+validated message authentication code rather than the legacy path.
+
+Petra: "Clients are calling support for what is really a failed remote
+command. It's expensive and embarrassing."
+
+Priya: "High priority. This is a trust issue."
+
+------
+
+Theme 7: PartnerPortal sign-in friction
+
+Petra raised this for the client side. Client admin accounts at our larger
+client groups juggle separate logins for the PartnerPortal, and sessions
+expire mid-order-write so they lose a partially entered order record. The
+top-20 client groups want single sign-on, and security wants two-factor
+on the portal because it touches controlled-article data.
+
+Ravi: "Both of these are about PartnerPortal identity. Make sure any new
+auth flow federates through IdentityVault (IV) — we are not standing up a
+second credential store."
+
+------
+
+Things we explicitly said NO to this round:
+- Remote firmware scripting by clients (hardware/platform project owned
+  by the device HW team, not us)
+- SupplySync portal redesign (next FY)
+- B2B enterprise account analytics dashboard (still in research)
+
+------
+
+Next steps:
+Priya will write up the Q3 OKRs. Ravi will start grooming. Petra takes
+the firmware deployment resilience scope. Kenji takes order status +
+material status card. Nalini takes NCR/CAPA case unification with
+Yusuf's compliance sign-off.

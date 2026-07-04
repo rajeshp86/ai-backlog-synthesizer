@@ -1,0 +1,175 @@
+name: Deploy → AWS
+
+# Trigger:
+#   • Manual dispatch — choose build-only or full deploy
+#   • Automatic on push to main (builds + deploys)
+#
+# Pipeline:
+#   1. Build Docker image and push to ECR
+#   2. SSH into EC2, pull latest image, restart service
+#   3. Smoke-test the health endpoint
+#
+# Required GitHub Secrets (Settings → Secrets → Actions):
+#   AWS_ACCESS_KEY_ID        IAM user key with ECR push + EC2 describe permissions
+#   AWS_SECRET_ACCESS_KEY    IAM user secret
+#   AWS_REGION               e.g. us-east-1
+#   ECR_REGISTRY             e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com
+#   EC2_HOST                 Elastic IP of the instance, e.g. 54.123.45.67
+#   EC2_SSH_PRIVATE_KEY      Contents of the .pem key file (paste the full text)
+#
+# Required GitHub Environment (Settings → Environments):
+#   aws-production  — add "Required reviewers" for a manual approval gate
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - "infra/**"
+  workflow_dispatch:
+    inputs:
+      build_only:
+        description: "Build and push image only (skip EC2 deploy)"
+        type: boolean
+        default: false
+
+jobs:
+  # ── 1. Build and push to ECR ─────────────────────────────────────────────
+  build-push-ecr:
+    name: Build & push → ECR
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.ECR_REGISTRY }}/backlog-synthesizer:${{ github.sha }}
+            ${{ secrets.ECR_REGISTRY }}/backlog-synthesizer:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Record image reference
+        id: meta
+        run: |
+          echo "image=${{ secrets.ECR_REGISTRY }}/backlog-synthesizer:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          echo "Built: ${{ secrets.ECR_REGISTRY }}/backlog-synthesizer:${{ github.sha }}"
+
+  # ── 2. Deploy to EC2 ────────────────────────────────────────────────────
+  deploy-ec2:
+    name: Deploy → EC2
+    runs-on: ubuntu-latest
+    needs: build-push-ecr
+    if: ${{ inputs.build_only != true }}
+    environment: aws-production
+    timeout-minutes: 10
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+
+      - name: Add EC2 host to known_hosts
+        run: |
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Pull latest image and restart service
+        run: |
+          IMAGE="${{ needs.build-push-ecr.outputs.image }}"
+          REGISTRY="${{ secrets.ECR_REGISTRY }}"
+          REGION="${{ secrets.AWS_REGION }}"
+
+          ssh ec2-user@"${{ secrets.EC2_HOST }}" bash -s << ENDSSH
+            set -euo pipefail
+            echo "Logging in to ECR..."
+            aws ecr get-login-password --region $REGION \
+              | docker login --username AWS --password-stdin $REGISTRY
+
+            echo "Pulling image: $IMAGE"
+            docker pull "$IMAGE"
+
+            # Tag as :latest so the systemd unit always uses the new image
+            docker tag "$IMAGE" "$REGISTRY/backlog-synthesizer:latest"
+
+            echo "Restarting service..."
+            sudo systemctl restart backlog-synthesizer
+            sleep 5
+            sudo systemctl is-active --quiet backlog-synthesizer && echo "Service is running."
+          ENDSSH
+
+  # ── 3. Smoke test ────────────────────────────────────────────────────────
+  smoke-test:
+    name: Smoke test — health endpoint
+    runs-on: ubuntu-latest
+    needs: deploy-ec2
+    timeout-minutes: 5
+
+    steps:
+      - name: Wait for healthy response (2-min window, 10-s intervals)
+        run: |
+          URL="http://${{ secrets.EC2_HOST }}:8502/_stcore/health"
+          echo "Probing: $URL"
+          for i in $(seq 1 12); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$URL" 2>/dev/null || echo "000")
+            echo "Attempt $i/12: HTTP $STATUS"
+            [ "$STATUS" = "200" ] && { echo "App is healthy."; exit 0; }
+            sleep 10
+          done
+          echo "ERROR: health endpoint did not return 200 within 2 minutes." >&2
+          exit 1
+
+  # ── 4. Summary ───────────────────────────────────────────────────────────
+  summary:
+    name: Deployment summary
+    runs-on: ubuntu-latest
+    needs: [build-push-ecr, deploy-ec2, smoke-test]
+    if: always()
+
+    steps:
+      - name: Write job summary
+        run: |
+          echo "## AWS Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ needs.build-push-ecr.outputs.image }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Host:** \`${{ secrets.EC2_HOST }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build & push ECR | ${{ needs.build-push-ecr.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy EC2       | ${{ needs.deploy-ec2.result }} |"       >> $GITHUB_STEP_SUMMARY
+          echo "| Smoke test       | ${{ needs.smoke-test.result }} |"        >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.smoke-test.result }}" = "success" ]; then
+            echo "**App URL:** http://${{ secrets.EC2_HOST }}:8502" >> $GITHUB_STEP_SUMMARY
+          fi

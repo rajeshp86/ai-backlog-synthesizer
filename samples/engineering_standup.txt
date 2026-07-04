@@ -1,0 +1,115 @@
+# Quantum Technologies — #platform-engineering Slack standup digest
+# Week of June 2 — Monday through Friday rollups, exported
+
+Monday standup
+--------------
+
+kenji   Morning. Three things from me today: 1) the remote-diagnostics
+        reliability spike from last week is wrapping up, 2) we have a
+        client complaint thread escalated from Priya about order status
+        drop-off, 3) the espresso machine on floor 4 is broken again,
+        can someone ping facilities?
+
+petra   I'll chase facilities 🙏
+
+zhao    on my side — pulling together the in-portal invoice payment
+        design doc for the PartnerPortal (credit card + ACH for client
+        invoices). Ravi wants me to scope this for Q3. Should I target
+        the full PartnerPortal web flow or just the mobile-responsive
+        side?
+
+ravi    Both. The full PartnerPortal web flow is the harder one (ERP
+        reconciliation) but mobile-responsive credit card for quick
+        invoice payment is a quick win.
+
+kenji   +1. We should also wire ACH alongside credit card, it's
+        basically free if the InvoiceGateway SDK is wrapped right.
+        Most enterprise clients prefer ACH anyway.
+
+priya   👋 chiming in — the order status drop-off complaints are up
+        4% week over week. Anyone seen the portal data?
+
+zhao    yeah pulled it yesterday. Big drop after clients see 'On Track'
+        and then their account manager calls to say the order is behind.
+        Trust issue.
+
+priya   Got it. Live order status it is then.
+
+Tuesday standup
+---------------
+
+kenji   Spike summary on remote diagnostics: if we route the diagnostic
+        command through the diagnostic control plane with a validated
+        MAC instead of the legacy path, success rate jumps from 88% to
+        99% and stays under the p95 latency budget. No more 'Command
+        Sent' with nothing actually executing on the device.
+
+ravi    nice. Sounds like a real story.
+
+zhao    isn't there already a QT-something for production order
+        preference ranking? Clients want recommended production slots
+        to respect their delivery constraints.
+
+kenji   ugh let me check. … yeah QT-251 is "production order ranking:
+        factor in client delivery preferences". It's been in the
+        backlog for a year.
+
+ravi    So we resurrect that one, attach the spike doc, and push it up
+        the priority list. Don't write a new story.
+
+kenji   ok cool
+
+priya   tangent — did anyone watch the new Severance season? only on
+        episode 2 and already losing it
+
+petra   yes!! Don't spoil anything
+
+Wednesday standup
+-----------------
+
+kenji   Carrying over: in-portal invoice payment design doc still in
+        flight, zhao targeting Friday for first review.
+
+zhao    yes, on track. One question for Yusuf — does in-portal credit
+        card payment hit any new PCI scope? Or is it the same as any
+        other tokenized card flow?
+
+ravi    Yusuf's out today. Ping him async — short answer is it should
+        be fine because InvoiceGateway handles tokenization and our
+        servers never see the PAN, but get his formal sign-off.
+
+kenji   also, dumb question — is there an architecture rule against
+        doing the payment authorisation client-side without going
+        through InvoiceGateway? Like calling the processor endpoint
+        straight from the portal.
+
+ravi    Yes — direct calls to payment processors are forbidden under
+        Section 2 of the architecture constraints. Everything goes
+        through InvoiceGateway, no exceptions. Don't even
+        sketch that design.
+
+Thursday standup
+----------------
+
+zhao    quick thing: lunch order goes in at noon, the new ramen place —
+        let me know if you want in
+
+(7 emoji reactions — no further discussion)
+
+kenji   back to work. New ask from client success — OEM clients want
+        to see their confirmed order delivery date on the PartnerPortal
+        home screen, not buried in the order detail page. Ravi, is
+        that small?
+
+ravi    trivial — it's already fetched on status load, just needs a UI
+        element. Add a story.
+
+Friday standup
+--------------
+
+kenji   vacation reminder — I'm out next week, petra is acting lead.
+
+petra   ok 🫡
+
+zhao    Invoice payment design doc dropped — link in #payments. PR with
+        the order delivery date status-card mockup also up.

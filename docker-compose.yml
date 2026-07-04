@@ -1,0 +1,106 @@
+# Backlog Synthesizer — full stack (app + ChromaDB + Redis)
+#
+# Usage:
+#   cp .env.example .env          # fill in ANTHROPIC_API_KEY at minimum
+#   docker compose up --build     # first run — builds the app image
+#   docker compose up -d          # subsequent runs (detached)
+#   docker compose down           # stop all services
+#   docker compose down -v        # stop and delete all volumes (wipes ChromaDB + Redis data)
+#
+# Ports exposed on your host:
+#   http://localhost:8502          → Streamlit UI
+#   http://localhost:8000          → ChromaDB HTTP API (optional — for direct inspection)
+#   localhost:6379                 → Redis (optional — for direct inspection)
+#
+# Services:
+#   app     — Backlog Synthesizer (Streamlit + LangGraph pipeline)
+#   chroma  — ChromaDB vector store (duplicate detection, persistent)
+#   redis   — Redis (budget tracking + rate limiting, persistent)
+
+services:
+
+  # ── ChromaDB — persistent vector store ──────────────────────────────────────
+  chroma:
+    image: chromadb/chroma:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/.chroma
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ALLOW_RESET: "FALSE"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── Redis — budget + rate-limit store ────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  # ── Backlog Synthesizer app ───────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8502:8502"
+    env_file:
+      - .env
+    environment:
+      # ChromaDB — connect to the chroma service defined above
+      USE_CHROMADB: "1"
+      CHROMADB_SERVER_URL: "http://chroma:8000"
+
+      # Redis — connect to the redis service defined above
+      REDIS_URL: "redis://redis:6379/0"
+      REDIS_REQUIRED: "0"          # set to 1 to hard-fail if Redis is unreachable
+
+      # Runtime paths — mapped to named volumes for persistence
+      OUTPUTS_DIR: /app/outputs
+      LOGS_DIR: /app/logs
+      AUDIT_DB_PATH: /app/logs/audit_chain.db
+
+      # Streamlit
+      PORT: "8502"
+    volumes:
+      - app_outputs:/app/outputs
+      - app_logs:/app/logs
+    depends_on:
+      chroma:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8502/_stcore/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+# ── Named volumes (data persists across container restarts) ───────────────────
+volumes:
+  chroma_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_outputs:
+    driver: local
+  app_logs:
+    driver: local

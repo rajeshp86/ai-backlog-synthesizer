@@ -1,0 +1,93 @@
+[
+  {
+    "number": 142,
+    "title": "Module loses network session on plant Wi-Fi, remote diagnostic commands silently fail",
+    "body": "Remote diagnostic and configuration commands from the PartnerPortal return 'Command Sent' to the client even when the embedded control module has dropped its network session on congested industrial plant Wi-Fi. Clients think the command executed. We need the portal to reflect actual command acknowledgement from the diagnostic control plane, not just queue acceptance.",
+    "state": "open",
+    "labels": ["telemetry", "remote-diagnostics", "reliability"]
+  },
+  {
+    "number": 138,
+    "title": "Firmware deployment progress bar stalls at 99% on slow connections",
+    "body": "On weak signal, the firmware download completes but the install-verify step times out the UI, leaving the progress bar stuck at 99%. The firmware actually applies on next device restart, but clients panic and call support. Decouple the UI from the install step and show an honest 'will complete on next restart' state.",
+    "state": "open",
+    "labels": ["firmware-updates", "partner-portal", "ux"]
+  },
+  {
+    "number": 136,
+    "title": "Firmware deployment orchestrator does not back off when CDN throughput cap is hit",
+    "body": "During peak firmware deployment windows the FirmwareVault orchestrator keeps retrying at full rate when the CDN saturates, so device batches stall in 'Update Pending' and block the next deployment wave. Implement exponential back-off, a per-ring rollout throttle, and immediate resume-to-normal if an update stalls. Overlaps the staged-rollout ask from Q3 planning.",
+    "state": "open",
+    "labels": ["firmware-updates", "performance", "reliability"]
+  },
+  {
+    "number": 131,
+    "title": "PartnerPortal SSO session expires mid-NCR-write, loses form data",
+    "body": "Client support agents lose a partially entered QualityHub NCR record when their SAML session expires mid-session. Re-authenticate transparently and preserve the in-progress form rather than redirecting to the login page.",
+    "state": "open",
+    "labels": ["partner-portal", "security"]
+  },
+  {
+    "number": 129,
+    "title": "Two-factor authentication missing on the PartnerPortal",
+    "body": "The PartnerPortal exposes ITAR-controlled order data and client PII but only requires a single-factor login. Add 2FA federated through IdentityVault for the top-20 OEM client groups first. Related to the SSO work in #131.",
+    "state": "open",
+    "labels": ["partner-portal", "security", "compliance"]
+  },
+  {
+    "number": 127,
+    "title": "Production order 'On Track' badge stale by up to 4 hours",
+    "body": "PartnerPortal shows production order status from the OrderTrack cache instead of the live MES production feed. OEM clients see 'On Track' for orders that are actually delayed. Wire the live production event stream with a freshness SLA. Likely overlaps with JIRA QT-412.",
+    "state": "open",
+    "labels": ["partner-portal", "mes", "telemetry"]
+  },
+  {
+    "number": 124,
+    "title": "NCR cases submitted via PartnerPortal don't reconcile with the quality desk",
+    "body": "The PartnerPortal NCR submission channel and the quality-desk direct entry in QualityHub write to different systems and don't reconcile in real time, so clients are told 'no record found' by the quality engineer. Establish one unified NCR record per client-order/incident through QualityHub regardless of intake channel.",
+    "state": "open",
+    "labels": ["partner-portal", "ncr-capa", "quality"]
+  },
+  {
+    "number": 121,
+    "title": "Supplier delivery confirmation date not visible on any client-facing surface",
+    "body": "OEM clients receive a 'Materials Confirmed' notification at PO placement, then later 'Material Delayed — production rescheduled' with no intermediate visibility. The confirmed material delivery date isn't shown anywhere in the PartnerPortal. Surface a material-status card with delivery date, PO status, and production impact. Overlaps JIRA QT-389.",
+    "state": "open",
+    "labels": ["supply-chain", "partner-portal"]
+  },
+  {
+    "number": 119,
+    "title": "Certificate of Conformance occasionally missing REACH/RoHS compliance declaration",
+    "body": "For a subset of assemblies shipped through ComponentID, the generated COA omits the REACH/RoHS compliance declaration line. Compliance flagged this as a gap — REACH/RoHS declarations are mandatory on every COA. Ensure the COA template always renders the compliance reference returned by ComponentID.",
+    "state": "open",
+    "labels": ["quality", "compliance", "supply-chain"]
+  },
+  {
+    "number": 112,
+    "title": "Gen1 embedded controllers (2019–2021) can only receive full-image firmware, not differential",
+    "body": "Gen1 embedded controllers with 256 MB flash cannot apply differential firmware packages and do not support TLS 1.3. Until the hardware refresh campaign completes, the FirmwareVault pipeline must detect Gen1 devices and route them to full-image packages over a TLS 1.2 path. Flag the capability floor on every new firmware-dependent story.",
+    "state": "open",
+    "labels": ["firmware-updates", "telemetry", "mes"]
+  },
+  {
+    "number": 108,
+    "title": "MES shop-floor terminal unresponsive while firmware update is stuck pending",
+    "body": "When a firmware deployment stalls, the MES shop-floor terminal becomes unresponsive for the duration instead of staying usable for production operations. Operators should retain full MES function while a firmware update waits or retries in the background.",
+    "state": "open",
+    "labels": ["mes", "firmware-updates", "offline-mode"]
+  },
+  {
+    "number": 103,
+    "title": "Production event consumer falls behind during nightly MES sync",
+    "body": "The RabbitMQ consumer for the production event stream backs up during the 02:00 UTC nightly MES sync, delaying NCR-trigger events by up to 15 minutes. Related to the planned Kafka migration (QT-227); track here for the short-term backpressure fix.",
+    "state": "open",
+    "labels": ["telemetry", "infrastructure", "performance"]
+  },
+  {
+    "number": 97,
+    "title": "PartnerPortal not localised for Spanish and French OEM clients",
+    "body": "Large OEM client groups in Mexico, Spain, and Canada see English-only strings in the PartnerPortal, hurting adoption and support efficiency. Add full localisation for Spanish (es-MX, es-ES) and French (fr-CA), including firmware update notices and NCR notification copy.",
+    "state": "open",
+    "labels": ["partner-portal", "i18n"]
+  }
+]

@@ -1,0 +1,37 @@
+Client escalation note — forwarded from #cx-escalations
+From: Jordan Reyes (Senior Client Experience Specialist)
+To: Priya, Kenji
+Subject: One real issue + my usual Friday rant
+
+Hey both — hope you had a good week. I survived. The puppy is finally
+sleeping through the night, which is a personal milestone.
+
+One real thing to flag: we had three separate clients in the last two
+days call in because the work-order confirmation email from the
+PartnerPortal — the one that fires after you book a field service
+appointment — is going to spam in Gmail. All three were Gmail users,
+all three had booked successfully through the portal. They just panicked
+because they thought the appointment hadn't gone through and called us.
+One actually double-booked the same service slot before we could call
+them back, and now the field team has a phantom appointment to cancel.
+
+I checked with the email ops folks and they think it's a DKIM alignment
+issue on the outbound mailer that handles work-order confirmations
+specifically. Other transactional emails (NCR alerts, account
+verification) are landing fine. So it's probably configuration drift
+on the work-order confirmation template path, not a domain-wide
+reputation issue.
+
+Worth a story to lock down the deliverability of work-order confirmation
+emails specifically, with a synthetic monitor that ships a test
+confirmation to a Gmail inbox once an hour and alerts if it lands in
+spam.
+
+(And before anyone asks — no, this is NOT the same as the remote-
+diagnostics flakiness thread from last month. That one was the module
+losing its network session on flaky plant Wi-Fi. Different problem,
+already has a ticket. Please don't merge them again.)
+
+Anyway — happy weekend. Tell Kenji I still owe him a coffee.
+
+— Jordan

@@ -1,0 +1,16 @@
+Quantum Technologies — cross-team planning, 2026-05-08
+Attendees: Hiroshi (Supply Chain Tech), Aisha (MES & Firmware), Jamal (Telemetry), Priya (VP Digital Ops), Kenji (Client Portal Lead)
+
+Kenji: Let's go around. What's top of mind?
+
+Hiroshi (Supply Chain Tech): SupplySync portal latency. The delivery-confirmation view on the supplier tablet hit 8-second loads last weekend on plant Wi-Fi. Suppliers are escalating. Not blocking them outright but they notice.
+
+Aisha (MES & Firmware): Two things. First, deep links from our NCR notification emails are broken on Android — taps open the PartnerPortal then bounce to the home screen instead of the NCR detail. Quality team's follow-up rate is wrong because of it. Second, the MES terminal OS upgrade — we want to bump to the new industrial Android arch in Q3 but I need product to weigh in on what regresses on the shop floor.
+
+Jamal (Telemetry): Production telemetry event stream — duplicate production-run events are firing twice. Enterprise account admins are getting two production-summary notifications 30 minutes apart. Trust hit.
+
+Priya (VP Digital Ops): Two reports of supplier delivery confirmation emails still being confusing — same as the QT-389 ticket we already have. Not new.
+
+Kenji: OK. SupplySync perf, Android deep links for NCR emails, duplicate telemetry production events, MES terminal OS upgrade. Plus the supplier confirmation repeat. Did I get all of them?
+
+(general agreement)

@@ -1,0 +1,7 @@
+{
+  "case_id": "case_09",
+  "description": "Cross-team planning meeting touching client portal, supply chain tech, and telemetry. The system must produce one story per concrete ask AND catch the QT-389 supplier delivery confirmation duplicate.",
+  "transcript_path": "evaluation/golden_dataset/transcripts/case_09_multi_team.txt",
+  "constraints_path": "samples/architecture_constraints.md",
+  "backlog_path": "samples/jira_backlog.json"
+}

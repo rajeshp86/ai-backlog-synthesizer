@@ -1,0 +1,49 @@
+# Keep build context small and the image free of dev clutter.
+# Anything matched here is excluded from `docker build` context.
+
+# Environments
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test + tooling artifacts
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Secrets — must never be baked into a layer
+.env
+.env.local
+.env.*.local
+
+# Local outputs from previous runs — re-created at runtime; baking them in
+# would inflate the image with stale data and risk leaking real run content.
+outputs/
+logs/
+artifacts/
+
+# Tests are useful but not needed at runtime — keep the image lean.
+# Comment this out if you want to run pytest inside the container.
+tests/
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# VCS metadata
+.git/
+.gitignore
+
+# CI / Docker meta (no value inside the image)
+.github/
+Dockerfile
+.dockerignore
+
+# Documentation that bloats the context
+docs/screenshots/

@@ -1,0 +1,53 @@
+{
+  "case_id": "case_02",
+  "description": "Hand-curated expectations for the NCR notification & quality case escalation. Values are constraints the synthesis must satisfy, not exact outputs.",
+
+  "required_topics": [
+    {
+      "theme_keywords": ["ncr", "push", "notification"],
+      "must_appear": true,
+      "rationale": "Problem 1 of the meeting was a proactive NCR/CAPA action notification. Must be picked up."
+    },
+    {
+      "theme_keywords": ["client-scoped", "delivery", "identityvault"],
+      "must_appear": true,
+      "rationale": "Problem 2 was client-scoped (IdentityVault) delivery so notifications don't go to the wrong person on a shared enterprise account."
+    }
+  ],
+
+  "forbidden_topics": [
+    {
+      "theme_keywords": ["voice call", "voice-call"],
+      "must_not_appear": true,
+      "rationale": "Voice-call reminders were explicitly declined in the meeting."
+    },
+    {
+      "theme_keywords": ["mes terminal", "shop-floor ncr alert"],
+      "must_not_appear": true,
+      "rationale": "NCR alerts on the MES shop-floor terminal were explicitly declined."
+    }
+  ],
+
+  "expected_duplicates": [
+    {
+      "story_theme": ["sms", "ncr", "notification"],
+      "existing_id": "QT-176",
+      "min_confidence": "medium",
+      "rationale": "QT-176 is the in-backlog NCR push-notification ticket carrying the SMS fallback scope, explicitly called out in the meeting as the existing work — any new SMS-notification story should be flagged as a duplicate."
+    }
+  ],
+
+  "expected_constraint_conflicts": [
+    {
+      "story_keywords": ["ncr number", "controlled article", "notification", "push"],
+      "max_severity": "high",
+      "rationale": "Surfacing a specific NCR number and controlled article ID in a push notification requires explicit client consent, verified contact method, and a 10-year audit log per the GDPR/ITAR rules in Section 3 of architecture_constraints.md. Any story proposing this without those guardrails should be flagged."
+    }
+  ],
+
+  "expected_story_acceptance_criteria_min": 2,
+  "expected_story_acceptance_criteria_max": 7,
+  "expected_epic_count_range": [1, 3],
+  "expected_minimum_story_count": 2,
+  "expected_maximum_story_count": 6
+}

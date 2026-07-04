@@ -1,0 +1,7 @@
+{
+  "case_id": "case_04",
+  "description": "Negative / minimal case. A short client support note that mentions ONE real product issue (work-order confirmation email going to spam) surrounded by polite small-talk. Tests hallucination resistance — the system must NOT invent stories from social pleasantries, and must produce at most a few well-grounded stories.",
+  "transcript_path": "evaluation/golden_dataset/transcripts/case_04_support_note.txt",
+  "constraints_path": "samples/architecture_constraints.md",
+  "backlog_path": "samples/jira_backlog.json"
+}

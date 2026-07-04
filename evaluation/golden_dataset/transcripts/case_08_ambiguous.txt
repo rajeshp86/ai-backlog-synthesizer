@@ -1,0 +1,24 @@
+Quantum Technologies — quarterly client advisory panel, 2026-04-22
+Attendees: Client Advisory Board (4 client contacts), Kenji (Client Portal Lead), Priya (VP Digital Ops)
+
+Kenji: Open question — what should we focus on next quarter?
+
+Client A: I dunno, just make it better.
+
+Client B: The PartnerPortal sometimes feels slow but it's hard to say when. Maybe the order search?
+
+Client C: I want more visibility into my production schedule.
+
+Client D: The portal should feel more modern. I'm not sure what that means exactly.
+
+Kenji: Anything more specific?
+
+Client A: Just the vibes. The vibes are off.
+
+Client B: Yeah I think order placement is fine? Mostly?
+
+Client C: I had a thing happen last week but I forget what.
+
+Kenji: OK. Anything actionable?
+
+Priya: (after the call) Kenji, I think the only signal we got was that the PartnerPortal feels slow to at least one person — and even that was hedged.

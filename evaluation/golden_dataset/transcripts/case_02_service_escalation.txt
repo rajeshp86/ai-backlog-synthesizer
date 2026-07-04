@@ -1,0 +1,99 @@
+Quantum Technologies — NCR Notification & Quality Case Experience Escalation
+Attendees: Nalini (Quality PM), Yusuf (Compliance), Ravi (Director Platform Eng),
+           Kenji (Client Portal Lead), Priya (VP Digital Ops)
+Date: May 9
+
+Nalini opened — said NCR and quality case notification complaints are spiking
+in the PartnerPortal feedback. OEM clients tell us they didn't know an NCR
+was open on their order, or worse, they got a notification and then opened
+the portal only to find out the alert had been pushed to the wrong contact
+on a shared enterprise account. Two client account managers in the Phoenix
+region filed formal complaints last week.
+
+------
+
+Problem 1: NCR-ready notifications are unreliable
+
+Today the in-portal notification fires only when the client opens the
+PartnerPortal and the home screen polls the QualityHub service. If they
+never open the portal, they never know the NCR or corrective action is
+ready. We are leaving quality actions unactioned — and worse, clients are
+finding out about non-conformances through their own receiving inspection
+instead of from us.
+
+Nalini's ask: a proactive push notification when an NCR or CAPA action is
+open for the account. Kenji said the push infrastructure is in place —
+this is a backend trigger problem off the QualityHub event stream, not a
+portal problem.
+
+Nalini: "And we want the notification text to include the specific NCR
+number and article so the client recognises it. Like 'NCR 24Q-318:
+non-conformance on Assembly P/N 7701-C is open for your review.'"
+
+Yusuf cut in immediately — that is not OK under GDPR/CCPA and ITAR.
+Surfacing a specific NCR number and a controlled article part number in
+a push notification requires explicit client consent stored on the account
+record, AND it can only go to the client's verified technical contact,
+never the shared enterprise account default. We've been bitten by this
+before.
+
+Nalini: "Right, sorry. We can do a generic 'You have an open quality
+action — open the portal for details' and let them tap through.
+Detail-on-tap, not detail-in-banner."
+
+Yusuf: "That's fine. Anything that does show the NCR number and controlled
+article ID needs opt-in plus verified delivery plus a 10-year audit log
+entry."
+
+Ravi: "Let's design it both ways and flag the opt-in version as a
+follow-up. Phase 1 ships generic, phase 2 adds opt-in for the
+NCR-detail surface."
+
+------
+
+Problem 2: The shared enterprise-account problem
+
+Today multiple technical contacts and an enterprise account admin can be
+on a single client account through IdentityVault (IV). QualityHub knows
+which NCR belongs to which account-ID and order, but the notification
+system fires to the account, not the verified technical contact. That is
+why the Phoenix client saw an NCR alert go to a procurement admin about
+a quality issue assigned to the engineering reviewer.
+
+Kenji: "We need client-contact-scoped notification delivery. The push goes
+only to the device that's logged in as that specific contact identity
+through IdentityVault (IV)."
+
+Yusuf: "Yes, this is the verified contact method requirement applied to
+push. It's not optional."
+
+Ravi assigned this to Kenji and Nalini together with Yusuf as the
+compliance reviewer.
+
+------
+
+Problem 3: SMS fallback
+
+Nalini brought up SMS — some client contacts in field operations don't
+have regular access to the portal. Could we send the quality-action
+notice by SMS too?
+
+Kenji paused. "Isn't QT-176 already for that?" Ravi checked the
+backlog — yes, QT-176 is the NCR push-notification-with-SMS-fallback
+ticket. It's in backlog status. Nalini: "Let's just push QT-176 up the
+priority list then. No new story needed."
+
+------
+
+Things we explicitly said NO to this round:
+- Automated voice-call reminders for NCR actions (Nalini asked, Ravi said
+  no — too expensive and not requested by clients).
+- Showing NCR alerts on the MES shop-floor terminal overlay while
+  operators are working — out of scope for this round.
+
+------
+
+Next steps:
+Nalini owns the proactive notification spec. Kenji owns the contact-scoped
+delivery work. Yusuf will draft the GDPR/ITAR consent and audit review
+checklist. QT-176 stays as the SMS workstream.

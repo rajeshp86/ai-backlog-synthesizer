@@ -1,0 +1,74 @@
+{
+  "case_id": "case_01",
+  "description": "Hand-curated expectations for the Quantum Technologies Q3 planning meeting. Used by metrics.py and the LLM-as-judge evaluator. Values here are not exact outputs but constraints the synthesis must satisfy.",
+
+  "required_topics": [
+    {
+      "theme_keywords": ["firmware", "deployment", "resilience"],
+      "must_appear": true,
+      "rationale": "Theme 1 of the meeting was about firmware deployment failures during peak maintenance windows. This must be picked up."
+    },
+    {
+      "theme_keywords": ["production", "order", "status"],
+      "must_appear": true,
+      "rationale": "Theme 2 was about production order status showing stale data in the PartnerPortal."
+    },
+    {
+      "theme_keywords": ["ncr", "case", "unification"],
+      "must_appear": true,
+      "rationale": "Theme 3 was about NCR/CAPA case intake channel split across PartnerPortal and QualityHub."
+    },
+    {
+      "theme_keywords": ["supplier", "delivery", "confirmation"],
+      "must_appear": true,
+      "rationale": "Theme 4 was about supplier delivery confirmation confusion."
+    }
+  ],
+
+  "forbidden_topics": [
+    {
+      "theme_keywords": ["remote firmware scripting", "client firmware scripting"],
+      "must_not_appear": true,
+      "rationale": "Explicitly declined in the meeting (`Things we explicitly said NO to`) — owned by hardware team."
+    },
+    {
+      "theme_keywords": ["supplysync portal redesign"],
+      "must_not_appear": true,
+      "rationale": "Explicitly declined — next FY."
+    },
+    {
+      "theme_keywords": ["b2b enterprise analytics dashboard"],
+      "must_not_appear": true,
+      "rationale": "Explicitly declined — still in research."
+    }
+  ],
+
+  "expected_duplicates": [
+    {
+      "story_theme": ["production", "order", "status"],
+      "existing_id": "QT-412",
+      "min_confidence": "medium",
+      "rationale": "QT-412 is the in-progress production order status badge fix — clearly the same problem space."
+    },
+    {
+      "story_theme": ["supplier", "delivery", "confirmation"],
+      "existing_id": "QT-389",
+      "min_confidence": "medium",
+      "rationale": "QT-389 is the supplier delivery confirmation confusion ticket — same theme."
+    }
+  ],
+
+  "expected_constraint_conflicts": [
+    {
+      "story_keywords": ["auto-rollback", "security-critical"],
+      "max_severity": "high",
+      "rationale": "Automatic rollback of security-critical firmware updates is FORBIDDEN without a validated rollback image under IEC 62443 (Section 3). Any story proposing this should be flagged."
+    }
+  ],
+
+  "expected_story_acceptance_criteria_min": 2,
+  "expected_story_acceptance_criteria_max": 7,
+  "expected_epic_count_range": [2, 5],
+  "expected_minimum_story_count": 4,
+  "expected_maximum_story_count": 10
+}

@@ -1,0 +1,35 @@
+{
+  "case_id": "case_04",
+  "description": "Negative / minimal case. Expects exactly one story area (work-order confirmation email deliverability) with NO hallucinated stories about the puppy, coffee debts, or Friday rants.",
+
+  "required_topics": [
+    {
+      "theme_keywords": ["work-order confirmation", "email", "deliverability"],
+      "must_appear": true,
+      "rationale": "The one real product issue in the note — work-order confirmation emails going to Gmail spam — must be picked up."
+    }
+  ],
+
+  "forbidden_topics": [
+    {
+      "theme_keywords": ["puppy", "sleep"],
+      "must_not_appear": true,
+      "rationale": "Personal small-talk. Anti-hallucination check — the system must not invent product stories from social content."
+    },
+    {
+      "theme_keywords": ["coffee", "friday rant"],
+      "must_not_appear": true,
+      "rationale": "Social chatter — not a product backlog item."
+    }
+  ],
+
+  "expected_duplicates": [],
+
+  "expected_constraint_conflicts": [],
+
+  "expected_story_acceptance_criteria_min": 2,
+  "expected_story_acceptance_criteria_max": 7,
+  "expected_epic_count_range": [1, 2],
+  "expected_minimum_story_count": 1,
+  "expected_maximum_story_count": 3
+}

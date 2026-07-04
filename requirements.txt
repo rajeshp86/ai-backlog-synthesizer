@@ -1,0 +1,52 @@
+anthropic>=0.39.0
+google-genai>=1.0.0    # new Gemini SDK (NOT google-generativeai)
+python-dotenv>=1.0.0
+pypdf>=4.0.0           # PDF transcript input
+pytest>=7.4.0
+
+# Live tool integrations (Confluence REST + future Jira live read).
+requests>=2.31.0
+
+# Retrieval / shared memory / local embeddings (duplicate detector).
+sentence-transformers>=2.7.0
+numpy>=1.24.0
+# chromadb <1.0.0: avoids CVE-2026-45829 (affects >=1.0.0) and CVE-2025-69872
+# (diskcache) — chromadb 0.5.x does not pull in diskcache at all.
+chromadb>=0.4.22,<1.0.0
+
+# ── LangGraph / LangChain orchestration ───────────────────────────────────
+# LangGraph drives the multi-agent StateGraph pipeline (replaces the
+# custom Orchestrator loop). LangChain provider packages replace the
+# direct SDK wrappers in tools/claude_tool.py, gemini_tool.py
+# while preserving the same call() / call_for_json() public interface.
+langgraph>=0.2.0
+langchain-core>=0.3.0
+langchain-anthropic>=0.3.0       # ChatAnthropic — replaces direct anthropic SDK calls
+langchain-google-genai>=2.0.0    # ChatGoogleGenerativeAI — replaces google-genai calls
+
+# tenacity kept for non-LLM retry use cases; LangChain handles LLM retries natively
+tenacity>=8.2.3
+
+# Web UI (optional). 1.32+ required for st.dialog.
+streamlit>=1.32.0
+pandas>=2.0.0
+
+# ── Enterprise production additions ───────────────────────────────────────
+
+PyYAML>=6.0
+
+# MCP (Model Context Protocol)
+mcp>=1.0.0 ; python_version >= "3.10"
+mcp-atlassian>=0.21 ; python_version >= "3.10"
+
+# OpenTelemetry — per-stage spans + optional OTLP export.
+opentelemetry-api>=1.24.0
+opentelemetry-sdk>=1.24.0
+opentelemetry-exporter-otlp-proto-http>=1.24.0
+
+# Observability
+prometheus-client>=0.20.0          # Prometheus metrics endpoint (port 9090)
+python-json-logger>=2.0.7          # structured JSON logging (LOG_FORMAT=json)
+
+# Multi-replica budget enforcement (optional — falls back to file-based if absent)
+redis>=5.0.0                       # shared daily spend counter across pods (set REDIS_URL)

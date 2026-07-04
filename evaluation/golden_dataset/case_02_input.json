@@ -1,0 +1,7 @@
+{
+  "case_id": "case_02",
+  "description": "NCR notification and quality case escalation meeting. Should produce stories around proactive NCR/CAPA push notifications and client-scoped (IdentityVault) verified delivery. Expect an ITAR/GDPR consent conflict (surfacing a specific NCR number and controlled article ID in a push) and a duplicate against QT-176 (NCR notification with SMS fallback).",
+  "transcript_path": "evaluation/golden_dataset/transcripts/case_02_ncr_escalation.txt",
+  "constraints_path": "samples/architecture_constraints.md",
+  "backlog_path": "samples/jira_backlog.json"
+}

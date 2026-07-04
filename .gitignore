@@ -1,0 +1,56 @@
+.env
+venv/
+.venv/
+venv3*/
+__pycache__/
+*.pyc
+.pytest_cache/
+outputs/*.json
+outputs/*.md
+!outputs/.gitkeep
+.DS_Store
+.vscode/
+.idea/
+
+# Claude Code local tooling config (not part of the project)
+.claude/
+
+# Local auth fallback config — holds a bcrypt hash + cookie key; keep only the .example
+config/auth.yaml
+
+# local embedding/vector cache
+.cache/
+
+# Word lock files
+~$*
+
+# Terraform — state files contain secrets, never commit
+infra/azure/.terraform/
+infra/azure/terraform.tfstate
+infra/azure/terraform.tfstate.backup
+infra/azure/terraform.tfstate.*.backup
+infra/azure/.terraform.lock.hcl
+# terraform.tfvars contains real API keys — use terraform.tfvars.example as template
+infra/azure/terraform.tfvars
+infra/azure/tfplan
+infra/aws/terraform.tfvars
+infra/aws/tfplan
+infra/aws/.terraform/
+infra/aws/.terraform.lock.hcl
+infra/aws/terraform.tfstate
+infra/aws/terraform.tfstate.backup
+
+# Runtime logs and synthesis outputs — never commit
+logs/runs/
+logs/*.json
+logs/.ui_state_*
+logs/audit_chain.db
+outputs/local/
+outputs/**/*.json
+outputs/**/*.md
+
+# Auth credential file — contains bcrypt password hashes; use config/auth.yaml.example as template
+config/auth.yaml
+
+# One-time Azure provisioning script — kept locally but not tracked in git
+scripts/azure_setup.sh

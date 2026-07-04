@@ -1,0 +1,26 @@
+Quantum Technologies — Platform emergency call, 2026-05-02
+Attendees: Hiroshi (Product), Aisha (Engineering), Yusuf (Compliance/Architecture, on speakerphone)
+
+Hiroshi: We're losing client orders at the invoice payment step and the funnel team thinks the extra network hop is the problem. I want the portal to call the payment processor directly and skip the gateway. Just authorize the card right from the PartnerPortal frontend.
+
+Aisha: Hiroshi, you know we can't do that. Direct calls to payment processors are forbidden.
+
+Yusuf: Confirmed. PCI scope reduction requires every payment authorization to go through the InvoiceGateway, which hands back a token. The portal must never touch the PAN. The architecture wiki Section 2 spells this out.
+
+Hiroshi: Fine. Then I want to ship an unsigned hotfix firmware tonight to fix the order status display on field controllers — we don't have time to wait for the signing pipeline.
+
+Yusuf: That's a hard no. All firmware packages must be cryptographically signed by the Quantum Technologies Code Signing Authority (QT-CSA). The device rejects unsigned or self-signed packages outright. IEC 62443 / NIST 800-82.
+
+Hiroshi: Then at least let me set the security-critical firmware update to auto-rollback automatically if clients report issues. No HIL, just flip it back.
+
+Aisha: We can't auto-rollback a security-critical firmware update. Cryptographic attestation, secure boot, certificate provisioning — automatic rollback is forbidden without a validated rollback image. IEC 62443 rules.
+
+Yusuf: Same family of rules. Anything security-critical needs offline hardware-in-the-loop validation first.
+
+Hiroshi: And one more — to make the production dashboard feel live, I want to poll production telemetry from the cloud every 10 seconds.
+
+Yusuf: Also blocked. Polling production telemetry from the cloud at intervals under 60 seconds is forbidden — use the production event stream instead.
+
+Hiroshi: So all four of my requests — direct payment-processor calls, unsigned firmware hotfix, security-critical firmware auto-rollback, 10-second telemetry polling — are blocked?
+
+Yusuf: I'd flag all four as architecture/compliance conflicts. The wiki is explicit.

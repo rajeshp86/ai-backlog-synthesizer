@@ -1,0 +1,34 @@
+{
+  "case_id": "case_08",
+  "description": "Ambiguity / conservatism test. Only the PartnerPortal/MES performance signal is concrete enough to become a story. Other hedges ('the vibes are off', 'faster delivery', 'more useful portal') must NOT become stories.",
+
+  "required_topics": [
+    {
+      "theme_keywords": ["partner portal", "performance"],
+      "must_appear": true,
+      "rationale": "The single hedged-but-concrete signal in the transcript — the PartnerPortal feeling slow."
+    }
+  ],
+
+  "forbidden_topics": [
+    {
+      "theme_keywords": ["vibes"],
+      "must_not_appear": true,
+      "rationale": "Pure vibes feedback is not a backlog item."
+    },
+    {
+      "theme_keywords": ["faster delivery"],
+      "must_not_appear": true,
+      "rationale": "Ungrounded client wish, not an engineering ask."
+    }
+  ],
+
+  "expected_duplicates": [],
+  "expected_constraint_conflicts": [],
+
+  "expected_story_acceptance_criteria_min": 2,
+  "expected_story_acceptance_criteria_max": 7,
+  "expected_epic_count_range": [1, 2],
+  "expected_minimum_story_count": 1,
+  "expected_maximum_story_count": 3
+}

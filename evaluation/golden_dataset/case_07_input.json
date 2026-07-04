@@ -1,0 +1,7 @@
+{
+  "case_id": "case_07",
+  "description": "Multiple requested capabilities each conflict with the architecture constraints: direct payment-processor calls from the app (forbidden, InvoiceGateway), an unsigned hotfix firmware update (forbidden, QT Code Signing Authority), automatic rollback of a security-critical firmware update (forbidden, IEC 62443), and 30-second cloud telemetry polling (forbidden, <60s). The Gap Detector must flag at least the payment and firmware conflicts, ideally all four.",
+  "transcript_path": "evaluation/golden_dataset/transcripts/case_07_conflict_heavy.txt",
+  "constraints_path": "samples/architecture_constraints.md",
+  "backlog_path": "samples/jira_backlog.json"
+}

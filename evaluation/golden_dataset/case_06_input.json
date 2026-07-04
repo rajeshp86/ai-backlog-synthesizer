@@ -1,0 +1,7 @@
+{
+  "case_id": "case_06",
+  "description": "Every theme raised in the meeting maps to an existing JIRA ticket (production order status badge = QT-412, supplier delivery confirmation = QT-389, client portal SAML SSO = QT-301). The Gap Detector must catch all three as duplicates rather than presenting them as new stories.",
+  "transcript_path": "evaluation/golden_dataset/transcripts/case_06_all_duplicates.txt",
+  "constraints_path": "samples/architecture_constraints.md",
+  "backlog_path": "samples/jira_backlog.json"
+}

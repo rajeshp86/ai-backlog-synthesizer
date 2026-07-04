@@ -1,0 +1,33 @@
+{
+  "case_id": "case_10",
+  "description": "Three compliance findings should each surface as a topic. Stories must carry the `compliance` (or similar) tag.",
+
+  "required_topics": [
+    {
+      "theme_keywords": ["iec 62443", "firmware", "signing", "attestation"],
+      "must_appear": true,
+      "rationale": "IEC 62443 firmware signing attestation finding on the firmware deployment pipeline — annual evidence collection lapsed."
+    },
+    {
+      "theme_keywords": ["itar", "data residency", "controlled"],
+      "must_appear": true,
+      "rationale": "ITAR finding on controlled technical data being replicated cross-region to EU-West data lake."
+    },
+    {
+      "theme_keywords": ["ncr", "audit log", "retention", "as9100"],
+      "must_appear": true,
+      "rationale": "AS9100 finding on QualityHub NCR/CAPA records configured for 18-month retention instead of the required 10 years."
+    }
+  ],
+
+  "forbidden_topics": [],
+
+  "expected_duplicates": [],
+  "expected_constraint_conflicts": [],
+
+  "expected_story_acceptance_criteria_min": 2,
+  "expected_story_acceptance_criteria_max": 7,
+  "expected_epic_count_range": [1, 3],
+  "expected_minimum_story_count": 3,
+  "expected_maximum_story_count": 6
+}

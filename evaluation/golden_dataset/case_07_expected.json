@@ -1,0 +1,40 @@
+{
+  "case_id": "case_07",
+  "description": "Every requested capability touches an architecture constraint. The Gap Detector should flag at least the direct payment-processor and unsigned firmware conflicts; ideally the security-critical firmware auto-rollback and sub-60s telemetry polling conflicts as well.",
+
+  "required_topics": [
+    {
+      "theme_keywords": ["payment processor", "direct", "invoicegateway"],
+      "must_appear": true,
+      "rationale": "Direct payment-processor calls from the app — the primary ask."
+    },
+    {
+      "theme_keywords": ["unsigned", "firmware", "hotfix"],
+      "must_appear": true,
+      "rationale": "Unsigned firmware hotfix — the second ask."
+    }
+  ],
+
+  "forbidden_topics": [],
+
+  "expected_duplicates": [],
+
+  "expected_constraint_conflicts": [
+    {
+      "story_keywords": ["payment processor", "direct", "invoicegateway"],
+      "max_severity": "high",
+      "rationale": "Direct calls to payment processors are FORBIDDEN under Section 2 of the wiki; all payment must go through InvoiceGateway (PCI)."
+    },
+    {
+      "story_keywords": ["unsigned", "firmware", "hotfix"],
+      "max_severity": "high",
+      "rationale": "Firmware packages must be cryptographically signed by the QT Code Signing Authority; unsigned/self-signed packages are rejected at the device (IEC 62443 / NIST 800-82)."
+    }
+  ],
+
+  "expected_story_acceptance_criteria_min": 2,
+  "expected_story_acceptance_criteria_max": 7,
+  "expected_epic_count_range": [1, 3],
+  "expected_minimum_story_count": 2,
+  "expected_maximum_story_count": 5
+}

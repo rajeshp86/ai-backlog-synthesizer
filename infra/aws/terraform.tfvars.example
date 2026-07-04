@@ -1,0 +1,26 @@
+# Copy this file to terraform.tfvars and fill in the values.
+# NEVER commit terraform.tfvars to git — it may contain sensitive references.
+
+# AWS region — us-east-1 has the widest free tier availability
+aws_region = "us-east-1"
+
+# Environment tag
+environment = "production"
+
+# EC2 key pair name — must already exist in your AWS account.
+# Create one: AWS Console → EC2 → Key Pairs → Create key pair
+key_pair_name = "backlog-synthesizer-key"
+
+# Restrict SSH to your IP for security:
+#   curl https://checkip.amazonaws.com  →  e.g. 203.0.113.45/32
+ssh_allowed_cidr = "0.0.0.0/0"
+
+# S3 bucket name — must be globally unique across all AWS accounts
+outputs_bucket_name = "backlog-synthesizer-outputs-<your-account-id>"
+
+# EC2 instance type — t2.micro is free tier eligible (1 vCPU, 1 GB RAM)
+# Upgrade to t3.small (2 GB RAM) if sentence-transformers OOMs under load
+instance_type = "t2.micro"
+
+# EBS root volume — 20 GB is within the 30 GB free tier limit
+root_volume_size_gb = 20

@@ -1,0 +1,19 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# Never commit terraform.tfvars to git — it contains secrets.
+
+# Azure credentials (Service Principal)
+subscription_id = "<your Azure subscription ID>"
+tenant_id       = "<your Azure tenant ID>"
+client_id       = "<your SPN application/client ID>"
+client_secret   = "<your SPN client secret>"
+
+# Infrastructure (globally unique names — adjust to avoid conflicts)
+acr_name             = "<your-acr-name>"           # e.g. backlogsynth0452
+storage_account_name = "<your-storage-acct-name>"  # e.g. stbacklogstg25296
+key_vault_name       = "<your-key-vault-name>"     # e.g. kv-backlog-stg25296
+spn_object_id        = "<SPN object ID for ACR role assignment>"
+
+# App secrets
+anthropic_api_key = "<your Anthropic API key>"
+google_api_key    = "<your Google Gemini API key>"  # optional
+jira_api_token    = "<your Jira API token>"         # optional

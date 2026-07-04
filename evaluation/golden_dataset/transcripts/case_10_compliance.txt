@@ -1,0 +1,14 @@
+Quantum Technologies — annual compliance review, 2026-03-30
+Attendees: Shirisha (Compliance), Swetha (Engineering), Rekha (Legal)
+
+Yusuf: Three findings from the audit.
+
+1. IEC 62443 firmware signing attestation — our annual evidence collection for the firmware deployment pipeline lapsed. We have no current attestation that every firmware package is signed by the QT Code Signing Authority (QT-CSA) and validated at the device. The auditor wants the full attestation re-run with InfoSec and a remediation report.
+
+2. ITAR controlled technical data residency — the analytics team has been replicating ITAR-controlled article technical data (part drawings + test specifications) into an EU-West data lake for a partner reporting project. Per ITAR/EAR, controlled technical data must reside in US-East and US-West regions. Cross-region replication to EU/APAC without an export licence is forbidden. We need to stop the replication and re-region the affected data immediately.
+
+3. NCR audit log retention gap — the QualityHub NCR/CAPA records are currently configured for 18-month retention. AS9100 requires 10-year retention. The older NCR records need to be migrated to long-term storage and the retention policy updated in QualityHub before the next AS9100 surveillance audit.
+
+Sara: Three fixes. The ITAR data-residency one is the most urgent — auditors flagged it for the 90-day remediation window.
+
+Aisha: IEC 62443 firmware signing attestation re-run, ITAR controlled data re-regioning, and AS9100 NCR audit log retention fix. Got it.

@@ -1,0 +1,7 @@
+{
+  "case_id": "case_08",
+  "description": "Highly ambiguous client advisory panel transcript. The system must produce very few, well-grounded stories (ideally just PartnerPortal/MES performance) rather than over-extracting from vague hedges.",
+  "transcript_path": "evaluation/golden_dataset/transcripts/case_08_ambiguous.txt",
+  "constraints_path": "samples/architecture_constraints.md",
+  "backlog_path": "samples/jira_backlog.json"
+}

@@ -1,0 +1,41 @@
+{
+  "case_id": "case_09",
+  "description": "Multi-team transcript — should produce concrete stories (SupplySync portal latency, Android deep links, duplicate production telemetry events, MES terminal OS upgrade discussion) and flag the supplier delivery confirmation as a duplicate of QT-389.",
+
+  "required_topics": [
+    {
+      "theme_keywords": ["supplysync", "portal", "latency"],
+      "must_appear": true,
+      "rationale": "Supply Chain Tech's primary concern — slow service-history view on the supplier tablet."
+    },
+    {
+      "theme_keywords": ["android", "deep link"],
+      "must_appear": true,
+      "rationale": "Mobile deep-link bug breaks marketing attribution."
+    },
+    {
+      "theme_keywords": ["telemetry", "duplicate", "work-order"],
+      "must_appear": true,
+      "rationale": "Double-firing production work-order-completion event bug."
+    }
+  ],
+
+  "forbidden_topics": [],
+
+  "expected_duplicates": [
+    {
+      "story_theme": ["supplier", "delivery", "confirmation"],
+      "existing_id": "QT-389",
+      "min_confidence": "medium",
+      "rationale": "Priya explicitly says this is the same ticket already in flight."
+    }
+  ],
+
+  "expected_constraint_conflicts": [],
+
+  "expected_story_acceptance_criteria_min": 2,
+  "expected_story_acceptance_criteria_max": 7,
+  "expected_epic_count_range": [2, 5],
+  "expected_minimum_story_count": 3,
+  "expected_maximum_story_count": 8
+}
