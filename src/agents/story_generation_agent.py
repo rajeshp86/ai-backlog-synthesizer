@@ -58,7 +58,7 @@ class StoryGenerationAgent(Agent):
             .replace("{{CONSTRAINTS_JSON}}", json.dumps(constraints, indent=2))
         )
         try:
-            parsed, usage = self.claude.call_for_json(prompt, max_tokens=8000)
+            parsed, usage = self.claude.call_for_json(prompt, max_tokens=8192)
         except ToolError as e:
             raise AgentError(f"Story Writer LLM call failed: {e}") from e
 
@@ -99,7 +99,7 @@ class StoryGenerationAgent(Agent):
         self.audit.record_tool_call(
             agent=self.name,
             tool=getattr(self.claude, "name", "claude"),
-            request={"prompt_chars": len(prompt), "max_tokens": 8000},
+            request={"prompt_chars": len(prompt), "max_tokens": 8192},
             response_excerpt=str(parsed)[:300],
             tokens_used=(usage.get("input_tokens") or 0) + (usage.get("output_tokens") or 0),
             usage=usage,

@@ -52,7 +52,7 @@ class DeliveryPlannerAgent(Agent):
 
         prompt = self._prompt_template.replace("{{STORIES_JSON}}", json.dumps(stories, indent=2))
         try:
-            parsed, usage = self.claude.call_for_json(prompt, max_tokens=8000)
+            parsed, usage = self.claude.call_for_json(prompt, max_tokens=8192)
         except ToolError as e:
             raise AgentError(f"Epic Decomposer LLM call failed: {e}") from e
 

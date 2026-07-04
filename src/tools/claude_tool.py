@@ -52,6 +52,48 @@ except ImportError:  # pragma: no cover
     HumanMessage = SystemMessage = None  # type: ignore[assignment,misc]
 
 
+def _salvage_truncated_json(raw: str) -> dict | None:
+    """Attempt to recover a valid JSON object from a truncated LLM response.
+
+    When max_tokens cuts the output mid-array, we close the JSON at the last
+    fully-completed inner object so callers get whatever was generated rather
+    than a hard failure.  Returns None if no salvageable content is found.
+    """
+    # Find the last position where an inner object was fully closed at depth 1
+    # (meaning we're back inside the outer array but after a complete item).
+    depth = 0
+    last_safe_end = -1
+    in_string = False
+    escape_next = False
+    for i, ch in enumerate(raw):
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 1:
+                # Just closed an inner object while still inside the outer one
+                last_safe_end = i + 1
+    if last_safe_end == -1:
+        return None
+    # Close the outer array and object
+    truncated = raw[:last_safe_end] + "]}"
+    try:
+        return json.loads(truncated)
+    except json.JSONDecodeError:
+        return None
+
+
 class ClaudeTool(Tool):
     """Claude API client using langchain-anthropic with retry + JSON parsing."""
 
@@ -229,7 +271,7 @@ class ClaudeTool(Tool):
             raise ToolError(f"No JSON object found in model output:\n{text[:300]}")
 
         last_err: Exception = ValueError("no candidates")
-        for raw in candidates:
+        for idx, raw in enumerate(candidates):
             depth = 0
             end   = -1
             for i, ch in enumerate(raw):
@@ -240,6 +282,21 @@ class ClaudeTool(Tool):
                     if depth == 0:
                         end = i + 1
                         break
+            if depth > 0 and idx == 0:
+                # The outermost JSON object was truncated (max_tokens hit).
+                # Try to salvage complete items from a top-level array key by
+                # closing the JSON at the last fully-closed inner object ("}").
+                salvaged = _salvage_truncated_json(raw)
+                if salvaged is not None:
+                    logger.warning(
+                        "LLM output truncated; salvaged partial JSON "
+                        "(%d top-level keys).", len(salvaged)
+                    )
+                    return salvaged
+                raise ToolError(
+                    "Model output appears truncated (JSON object never closed). "
+                    "Increase max_tokens for this agent."
+                )
             candidate = raw[:end] if end > 0 else raw
             try:
                 return json.loads(candidate)
